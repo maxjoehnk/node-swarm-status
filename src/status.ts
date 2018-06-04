@@ -7,6 +7,7 @@ const swarm = new Docker();
 
 export enum ServiceState {
     RUNNING,
+    PENDING,
     PARTIAL,
     ERROR
 }
@@ -22,7 +23,6 @@ export default async function () {
     });
 
     d('Fetching tasks');
-
     return await Promise.all(services.map(async service => {
         const tasks = await swarm.listTasks({
             filters: {
@@ -40,14 +40,26 @@ export default async function () {
 
         const running = taskStates.every(state => state === ServiceState.RUNNING);
         const error = taskStates.every(state => state === ServiceState.ERROR);
-
-        const status = running ? ServiceState.RUNNING : error ? ServiceState.ERROR : ServiceState.PARTIAL;
+        const pending = taskStates.length === 0;
 
         return {
             name: service.Spec.Labels['me.maxjoehnk.status'],
-            status,
+            status: stateFromTasks({ pending, running, error }),
             up: taskStates.filter(state => state === ServiceState.RUNNING).length,
             tasks: taskStates.length
         };
     }));
+}
+
+function stateFromTasks(tasks: { pending: boolean, error: boolean, running: boolean }): ServiceState {
+    if (tasks.pending) {
+        return ServiceState.PENDING;
+    }
+    if (tasks.error) {
+        return ServiceState.ERROR;
+    }
+    if (tasks.running) {
+        return ServiceState.RUNNING;
+    }
+    return ServiceState.PARTIAL;
 }

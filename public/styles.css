@@ -45,6 +45,23 @@ h2 {
     background: red;
 }
 
+.state.pending {
+    background: #0000FF;
+    animation: pulse 1s infinite;
+    animation-direction: alternate;
+    animation-delay: 2s;
+    animation-timing-function: ease-in-out;
+}
+
 body.error {
     margin: 16px;
+}
+
+@keyframes pulse {
+    0% {
+        background-color: #0000FF;
+    }
+    100% {
+        background-color: #7777FF;
+    }
 }

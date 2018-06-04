@@ -13,6 +13,8 @@ const handlebars = create({
             switch (state) {
                 case ServiceState.RUNNING:
                     return 'running';
+                case ServiceState.PENDING:
+                    return 'pending';
                 case ServiceState.PARTIAL:
                     return 'partial';
                 case ServiceState.ERROR:
