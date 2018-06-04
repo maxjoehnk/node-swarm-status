@@ -3,19 +3,19 @@ services:
     status:
         image: 127.0.0.1:5000/swarm-status
         build: .
-    volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
-    deploy:
-        placement:
-            constraints:
-                - node.role == manager
-        labels:
-            traefik.enable: "true"
-            traefik.port: "8080"
-            traefik.docker.network: web
-            traefik.frontend.rule: "Host:status.maxjoehnk.me"
-    networks:
-        - web
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        deploy:
+            placement:
+                constraints:
+                    - node.role == manager
+            labels:
+                traefik.enable: "true"
+                traefik.port: "8080"
+                traefik.docker.network: web
+                traefik.frontend.rule: "Host:status.maxjoehnk.me"
+        networks:
+            - web
 networks:
     web:
         external: true
