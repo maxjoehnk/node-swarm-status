@@ -1,67 +1,13 @@
-<html>
-<head>
-    <title>maxjoehnk.me - Status</title>
-    <style>
-        * {
-            font-family: Roboto, sans-serif;
-        }
-
-        body {
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .container {
-            display: flex;
-            flex-direction: column;
-            max-width: 1000px;
-            width: 100%;
-        }
-
-        .service {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-        }
-
-        .state {
-            display: block;
-            height: 16px;
-            width: 16px;
-            border-radius: 16px;
-        }
-
-        h2 {
-            margin: 8px;
-        }
-
-        .running {
-            background: green;
-        }
-
-        .partial {
-            background: yellow;
-        }
-
-        .error {
-            background: red;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Service Status</h1>
-        <div class="services">
-            {{#each status}}
-                <div class="service">
-                    <span class="state {{statusClass status}}"></span>
-                    <h2>{{name}}</h2>
-                    <span class="tasks">({{up}}/{{tasks}})</span>
-                </div>
-            {{/each}}
-        </div>
+<div class="container">
+    <h1>Service Status</h1>
+    <div class="services">
+        {{#each status}}
+            <div class="service">
+                <span class="state {{statusClass status}}"></span>
+                <h2>{{name}}</h2>
+                <span class="tasks">({{up}}/{{tasks}})</span>
+            </div>
+        {{/each}}
     </div>
-</body>
-</html>
+</div>
+<script src="script.js"></script>

@@ -39,7 +39,15 @@ app.get('/', try_async(async(req, res) => {
     });
 }));
 
-app.get('/status', try_async(async (req, res) => {
+app.get('/status', try_async(async(req, res) => {
+    const status = await getStatus();
+    res.render('index', {
+        status,
+        layout: false
+    });
+}));
+
+app.get('/api/status', try_async(async (req, res) => {
     const status = await getStatus();
 
     res.json(status);
