@@ -1,0 +1,13 @@
+<html>
+<head>
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+{{#if error}}
+    <body class="error">
+    {{{body}}}
+    </body>
+{{else}}
+    <body>{{{body}}}</body>
+{{/if}}
+</html>

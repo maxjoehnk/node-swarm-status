@@ -1,67 +1,62 @@
 import * as express from 'express';
 import * as logger from 'morgan';
-import * as Docker from 'dockerode';
-import * as debug from 'debug';
-import { Service } from 'dockerode';
-
-const d = debug('swarm-status:app');
+import getStatus, { ServiceState } from './status';
+import { create } from 'express-handlebars';
+import * as createError from 'http-errors';
+import { join } from 'path';
 
 const app = express();
 
-const swarm = new Docker();
+const handlebars = create({
+    helpers: {
+        statusClass: (state: ServiceState) => {
+            switch (state) {
+                case ServiceState.RUNNING:
+                    return 'running';
+                case ServiceState.PARTIAL:
+                    return 'partial';
+                case ServiceState.ERROR:
+                    return 'error';
+            }
+        }
+    },
+    defaultLayout: 'main',
+    extname: 'hbs'
+});
 
-enum ServiceState {
-    RUNNING,
-    PARTIAL,
-    ERROR
-}
+app.engine('hbs', handlebars.engine);
+app.set('view engine', 'hbs');
 
 app.use(logger('dev'));
 app.use(express.json());
+app.use(express.static(join(__dirname, '../public')));
 
-app.get('/status', try_async(async (req, res, next) => {
-    d('fetching services...');
-    const services = await swarm.listServices({
-        filters: {
-            label: [
-                'me.maxjoehnk.status'
-            ]
-        }
+app.get('/', try_async(async(req, res) => {
+    const status = await getStatus();
+    res.render('index', {
+        status,
+        title: 'maxjoehnk.me - Service Status'
     });
+}));
 
-    const status = await Promise.all(services.map(async service => {
-        const tasks = await swarm.listTasks({
-            filters: {
-                service: [service.Spec.Name],
-                'desired-state': ['running']
-            }
-        });
-
-        const taskStates = tasks
-            .map(task => ({
-                state: task.Status.State,
-                desired: task.DesiredState
-            }))
-            .map(({ state, desired }) => state === desired ? ServiceState.RUNNING : ServiceState.ERROR);
-
-        const running = taskStates.every(state => state === ServiceState.RUNNING);
-        const error = taskStates.every(state => state === ServiceState.ERROR);
-
-        const status = running ? ServiceState.RUNNING : error ? ServiceState.ERROR : ServiceState.PARTIAL;
-
-        return {
-            name: service.Spec.Name,
-            displayName: service.Spec.Labels['me.maxjoehnk.status'],
-            status,
-            up: taskStates.filter(state => state === ServiceState.RUNNING).length,
-            tasks: taskStates.length
-        };
-    }));
+app.get('/status', try_async(async (req, res) => {
+    const status = await getStatus();
 
     res.json(status);
     res.status(200);
     res.end();
 }));
+
+app.use((req, res, next) => next(createError(404)));
+
+app.use((err, req, res, next) => {
+    res.status(err.status || 500);
+    res.render('error', {
+        title: err.message,
+        message: err.message,
+        error: req.app.get('env') === 'development' ? err : {}
+    });
+});
 
 function try_async(handler: (req, res, next) => Promise<void>) {
     return (req, res, next) => handler(req, res, next)
