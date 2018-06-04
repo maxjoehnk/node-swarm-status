@@ -13,10 +13,34 @@ app.use(logger('dev'));
 app.use(express.json());
 
 app.get('/status', try_async(async (req, res, next) => {
-    d('fetching containers...');
-    const containers = await swarm.listContainers();
+    d('fetching services...');
+    const services = await swarm.listServices({
+        filters: {
+            label: [
+                'me.maxjoehnk.status'
+            ]
+        }
+    });
 
-    res.json(containers);
+    const status = await Promise.all(services.map(async service => {
+        const tasks = await swarm.listTasks({
+            filters: {
+                service: [service.Name]
+            }
+        });
+
+        return {
+            id: service.Id,
+            name: service.Name,
+            tasks: tasks.map(task => ({
+                id: task.Id,
+                name: task.Name,
+                status: task.Status
+            }))
+        };
+    }));
+
+    res.json(status);
     res.status(200);
     res.end();
 }));
