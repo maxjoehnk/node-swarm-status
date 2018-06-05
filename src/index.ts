@@ -4,11 +4,13 @@ import getStatus, { ServiceState } from './status';
 import { create } from 'express-handlebars';
 import * as createError from 'http-errors';
 import { join } from 'path';
+import * as helpers from 'handlebars-helpers';
 
 const app = express();
 
 const handlebars = create({
     helpers: {
+        ...helpers(),
         statusClass: (state: ServiceState) => {
             switch (state) {
                 case ServiceState.RUNNING:
@@ -26,6 +28,8 @@ const handlebars = create({
     extname: 'hbs'
 });
 
+app.locals.styles = ['styles.css'];
+
 app.engine('hbs', handlebars.engine);
 app.set('view engine', 'hbs');
 
@@ -37,7 +41,8 @@ app.get('/', try_async(async(req, res) => {
     const status = await getStatus();
     res.render('index', {
         status,
-        title: 'maxjoehnk.me - Service Status'
+        title: 'maxjoehnk.me - Service Status',
+        scripts: ['scripts.js']
     });
 }));
 

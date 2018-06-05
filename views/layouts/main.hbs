@@ -4,7 +4,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{title}}</title>
-    <link rel="stylesheet" href="/styles.css">
+    {{{css styles}}}
 </head>
 {{#if error}}
     <body class="error">
@@ -13,6 +13,7 @@
 {{else}}
     <body>
         {{{body}}}
+        {{{js scripts}}}
     </body>
 {{/if}}
 </html>
