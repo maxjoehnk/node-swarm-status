@@ -42,7 +42,7 @@ app.get('/', try_async(async(req, res) => {
     res.render('index', {
         status,
         title: 'maxjoehnk.me - Service Status',
-        scripts: ['scripts.js']
+        scripts: ['script.js']
     });
 }));
 
