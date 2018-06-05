@@ -23,7 +23,7 @@ export default async function () {
     });
 
     d('Fetching tasks');
-    return await Promise.all(services.map(async service => {
+    const status = await Promise.all(services.map(async service => {
         const tasks = await swarm.listTasks({
             filters: {
                 service: [service.Spec.Name],
@@ -49,6 +49,8 @@ export default async function () {
             tasks: taskStates.length
         };
     }));
+
+    return status.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function stateFromTasks(tasks: { pending: boolean, error: boolean, running: boolean }): ServiceState {
